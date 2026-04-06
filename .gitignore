@@ -1,0 +1,36 @@
+# ビルド成果物
+/backend/nextjs-manager-backend
+/backend/main
+
+# Go関連
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+
+# PHPセッション
+/frontend/sessions/
+
+# ログファイル
+*.log
+
+# OS関連
+.DS_Store
+Thumbs.db
+
+# エディタ関連
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 環境変数
+.env
+.env.local
+/backend/.env
+/frontend/.env
