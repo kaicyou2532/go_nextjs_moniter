@@ -392,7 +392,7 @@ if (isset($_GET['logout'])) {
     </div>
     
     <script>
-        const API_URL = 'http://localhost:8000/api';
+        const API_URL = '<?php echo API_URL; ?>';
         const token = '<?php echo $_SESSION['token']; ?>';
         
         let previewData = null;
@@ -420,6 +420,7 @@ if (isset($_GET['logout'])) {
                         'Content-Type': 'application/json',
                         'Authorization': token
                     },
+                    credentials: 'include',
                     body: JSON.stringify({
                         path: path,
                         pattern: pattern,
@@ -459,6 +460,7 @@ if (isset($_GET['logout'])) {
                         'Content-Type': 'application/json',
                         'Authorization': token
                     },
+                    credentials: 'include',
                     body: JSON.stringify({
                         path: path,
                         pattern: pattern,
@@ -545,7 +547,8 @@ if (isset($_GET['logout'])) {
                 const response = await fetch(`${API_URL}/validate`, {
                     headers: {
                         'Authorization': token
-                    }
+                    },
+                    credentials: 'include'
                 });
                 
                 if (response.status === 401) {

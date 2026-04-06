@@ -367,7 +367,7 @@ if (isset($_GET['logout'])) {
     </div>
     
     <script>
-        const API_URL = 'http://localhost:8000/api';
+        const API_URL = '<?php echo API_URL; ?>';
         const token = '<?php echo $_SESSION['token']; ?>';
         
         function switchTab(tabName) {
@@ -390,7 +390,8 @@ if (isset($_GET['logout'])) {
                 const response = await fetch(`${API_URL}/validate`, {
                     headers: {
                         'Authorization': token
-                    }
+                    },
+                    credentials: 'include'
                 });
                 
                 if (response.status === 401) {
