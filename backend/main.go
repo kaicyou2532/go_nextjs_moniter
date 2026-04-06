@@ -257,9 +257,9 @@ func executeCommandHandler(w http.ResponseWriter, r *http.Request) {
 	case "npm-build":
 		cmd = exec.Command("npm", "run", "build")
 	case "npm-start":
-		cmd = exec.Command("npm", "run", "start")
+		cmd = exec.Command("npm", "run", "start", "--", "-p", "3000")
 	case "npm-dev":
-		cmd = exec.Command("npm", "run", "dev")
+		cmd = exec.Command("npm", "run", "dev", "--", "-p", "3000")
 	case "npm-stop":
 		cmd = exec.Command("pkill", "-f", "next")
 	}

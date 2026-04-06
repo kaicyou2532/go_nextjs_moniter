@@ -18,7 +18,7 @@ if (file_exists($envFile)) {
 // API設定 - 動的にホストを取得
 $apiHost = $_SERVER['HTTP_HOST'] ?? 'localhost:8080';
 $apiHost = preg_replace('/:\d+$/', '', $apiHost); // ポート番号を削除
-$apiUrl = 'http://' . $apiHost . ':8000/api';
+$apiUrl = 'http://' . $apiHost . ':8070/api';
 define('API_URL', $apiUrl);
 
 // セッションディレクトリを設定
