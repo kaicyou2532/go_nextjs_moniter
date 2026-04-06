@@ -265,22 +265,22 @@ if (isset($_GET['logout'])) {
                 <button class="btn btn-success" onclick="executeCommand('nginx-start')">
                     <span class="icon">▶️</span>
                     <span>Nginx Start</span>
-                    <span class="description">Nginxを起動</span>
+                    <span class="description">ウェブサイトを公開</span>
                 </button>
                 <button class="btn btn-danger" onclick="executeCommand('nginx-stop')">
                     <span class="icon">⏹️</span>
                     <span>Nginx Stop</span>
-                    <span class="description">Nginxを停止</span>
+                    <span class="description">ウェブサイトを非公開</span>
                 </button>
-                <button class="btn btn-primary" onclick="executeCommand('npm-build')">
+                <button class="btn btn-warning" onclick="executeCommand('npm-build')">
                     <span class="icon">🔨</span>
                     <span>npm run build</span>
-                    <span class="description">プロジェクトをビルド</span>
+                    <span class="description">ウェブサイトの記事を更新</span>
                 </button>
-                <button class="btn btn-success" onclick="executeCommand('npm-start')">
+                <button class="btn btn-primary" onclick="executeCommand('npm-start')">
                     <span class="icon">▶️</span>
                     <span>npm run start</span>
-                    <span class="description">本番モードで起動</span>
+                    <span class="description">ウェブサイトを起動</span>
                 </button>
             </div>
             
