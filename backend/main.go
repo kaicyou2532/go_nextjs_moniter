@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -69,6 +70,22 @@ type CronRequest struct {
 	Schedule string `json:"schedule"`
 	Command  string `json:"command"`
 	ID       int    `json:"id,omitempty"`
+}
+
+// CleanupRequest represents a file cleanup request
+type CleanupRequest struct {
+	Path    string `json:"path"`
+	Pattern string `json:"pattern"`
+	Days    int    `json:"days"`
+	Preview bool   `json:"preview"`
+}
+
+// FileInfo represents file information
+type FileInfo struct {
+	Name    string `json:"name"`
+	Path    string `json:"path"`
+	Size    int64  `json:"size"`
+	ModTime string `json:"mod_time"`
 }
 
 var (
@@ -387,6 +404,103 @@ func deleteCronJobHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// cleanupFilesHandler handles file cleanup operations
+func cleanupFilesHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req CleanupRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"error":   "Invalid request",
+		})
+		return
+	}
+
+	// セキュリティチェック: パスが絶対パスであることを確認
+	if !filepath.IsAbs(req.Path) {
+		respondJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"error":   "Path must be absolute",
+		})
+		return
+	}
+
+	// ディレクトリが存在するか確認
+	info, err := os.Stat(req.Path)
+	if err != nil || !info.IsDir() {
+		respondJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"error":   "Directory does not exist",
+		})
+		return
+	}
+
+	// ファイルを検索
+	cutoffTime := time.Now().AddDate(0, 0, -req.Days)
+	var filesToDelete []FileInfo
+	var deletedCount int
+
+	err = filepath.Walk(req.Path, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return nil // エラーは無視
+		}
+		if info.IsDir() {
+			return nil // ディレクトリはスキップ
+		}
+
+		// パターンマッチング
+		matched := true
+		if req.Pattern != "" {
+			matched, _ = filepath.Match(req.Pattern, filepath.Base(path))
+		}
+
+		if matched && info.ModTime().Before(cutoffTime) {
+			fileInfo := FileInfo{
+				Name:    info.Name(),
+				Path:    path,
+				Size:    info.Size(),
+				ModTime: info.ModTime().Format("2006-01-02 15:04:05"),
+			}
+			filesToDelete = append(filesToDelete, fileInfo)
+
+			// プレビューモードでなければ削除実行
+			if !req.Preview {
+				if err := os.Remove(path); err == nil {
+					deletedCount++
+				}
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		respondJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"error":   "Failed to scan directory",
+		})
+		return
+	}
+
+	if req.Preview {
+		respondJSON(w, http.StatusOK, map[string]interface{}{
+			"success": true,
+			"preview": true,
+			"files":   filesToDelete,
+			"count":   len(filesToDelete),
+		})
+	} else {
+		respondJSON(w, http.StatusOK, map[string]interface{}{
+			"success": true,
+			"deleted": deletedCount,
+			"message": fmt.Sprintf("%d files deleted", deletedCount),
+		})
+	}
+}
+
 func main() {
 	// .envファイルを読み込み
 	if err := godotenv.Load(); err != nil {
@@ -402,6 +516,7 @@ func main() {
 	mux.HandleFunc("/api/cronjobs", authenticate(getCronJobsHandler))
 	mux.HandleFunc("/api/cronjobs/add", authenticate(addCronJobHandler))
 	mux.HandleFunc("/api/cronjobs/delete", authenticate(deleteCronJobHandler))
+	mux.HandleFunc("/api/cleanup", authenticate(cleanupFilesHandler))
 
 	// CORS設定
 	c := cors.New(cors.Options{
