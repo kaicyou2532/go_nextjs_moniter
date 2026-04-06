@@ -115,7 +115,10 @@ func authenticate(next http.HandlerFunc) http.HandlerFunc {
 		token := r.Header.Get("Authorization")
 		if token == "" {
 			log.Printf("Authentication failed: No token provided")
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			respondJSON(w, http.StatusUnauthorized, map[string]interface{}{
+				"success": false,
+				"error":   "Unauthorized",
+			})
 			return
 		}
 
@@ -125,13 +128,19 @@ func authenticate(next http.HandlerFunc) http.HandlerFunc {
 
 		if !exists {
 			log.Printf("Authentication failed: Token not found: %s", token)
-			http.Error(w, "Invalid or expired token", http.StatusUnauthorized)
+			respondJSON(w, http.StatusUnauthorized, map[string]interface{}{
+				"success": false,
+				"error":   "Invalid or expired token",
+			})
 			return
 		}
 
 		if time.Now().After(session.ExpiresAt) {
 			log.Printf("Authentication failed: Token expired for user: %s", session.Username)
-			http.Error(w, "Invalid or expired token", http.StatusUnauthorized)
+			respondJSON(w, http.StatusUnauthorized, map[string]interface{}{
+				"success": false,
+				"error":   "Invalid or expired token",
+			})
 			return
 		}
 
