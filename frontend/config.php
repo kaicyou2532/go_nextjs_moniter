@@ -18,7 +18,14 @@ if (file_exists($envFile)) {
 // API設定
 define('API_URL', 'http://localhost:8000/api');
 
+// セッションディレクトリを設定
+$sessionDir = __DIR__ . '/sessions';
+if (!file_exists($sessionDir)) {
+    mkdir($sessionDir, 0700, true);
+}
+
 // セッション設定
+ini_set('session.save_path', $sessionDir);
 ini_set('session.cookie_httponly', 1);
 ini_set('session.cookie_secure', 0); // HTTPSを使用する場合は1に設定
 ini_set('session.use_strict_mode', 1);
