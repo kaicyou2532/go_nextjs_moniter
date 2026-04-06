@@ -259,25 +259,25 @@ if (isset($_GET['logout'])) {
     
     <div class="container">
         <div class="card">
-            <h2>Nginx管理ツール</h2>
+            <h2>Nginx管理</h2>
             
             <div class="button-group">
-                <button class="btn btn-success" onclick="executeCommand('start')">
+                <button class="btn btn-success" onclick="executeCommand('nginx-start')">
                     <span class="icon">▶️</span>
                     <span>Start</span>
                     <span class="description">Nginxを起動</span>
                 </button>
-                <button class="btn btn-danger" onclick="executeCommand('stop')">
+                <button class="btn btn-danger" onclick="executeCommand('nginx-stop')">
                     <span class="icon">⏹️</span>
                     <span>Stop</span>
                     <span class="description">Nginxを停止</span>
                 </button>
-                <button class="btn btn-warning" onclick="executeCommand('reload')">
+                <button class="btn btn-warning" onclick="executeCommand('nginx-reload')">
                     <span class="icon">🔄</span>
                     <span>Reload</span>
                     <span class="description">設定を再読み込み</span>
                 </button>
-                <button class="btn btn-primary" onclick="executeCommand('status')">
+                <button class="btn btn-primary" onclick="executeCommand('nginx-status')">
                     <span class="icon">📊</span>
                     <span>Status</span>
                     <span class="description">Nginxの状態を確認</span>
@@ -285,6 +285,35 @@ if (isset($_GET['logout'])) {
             </div>
             
             <div id="output" class="output"></div>
+        </div>
+        
+        <div class="card">
+            <h2>Next.js管理</h2>
+            
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="executeCommand('npm-build')">
+                    <span class="icon">🔨</span>
+                    <span>Build</span>
+                    <span class="description">プロジェクトをビルド</span>
+                </button>
+                <button class="btn btn-success" onclick="executeCommand('npm-start')">
+                    <span class="icon">▶️</span>
+                    <span>Start</span>
+                    <span class="description">本番モードで起動</span>
+                </button>
+                <button class="btn btn-warning" onclick="executeCommand('npm-dev')">
+                    <span class="icon">🚀</span>
+                    <span>Dev</span>
+                    <span class="description">開発モードで起動</span>
+                </button>
+                <button class="btn btn-danger" onclick="executeCommand('npm-stop')">
+                    <span class="icon">⏹️</span>
+                    <span>Stop</span>
+                    <span class="description">Next.jsを停止</span>
+                </button>
+            </div>
+            
+            <div id="output2" class="output"></div>
         </div>
         
         <div class="card">
@@ -355,25 +384,45 @@ if (isset($_GET['logout'])) {
         
         function updateButtonContent(button, command) {
             const configs = {
-                'start': {
+                'nginx-start': {
                     icon: '▶️',
                     label: 'Start',
                     desc: 'Nginxを起動'
                 },
-                'stop': {
+                'nginx-stop': {
                     icon: '⏹️',
                     label: 'Stop',
                     desc: 'Nginxを停止'
                 },
-                'reload': {
+                'nginx-reload': {
                     icon: '🔄',
                     label: 'Reload',
                     desc: '設定を再読み込み'
                 },
-                'status': {
+                'nginx-status': {
                     icon: '📊',
                     label: 'Status',
                     desc: 'Nginxの状態を確認'
+                },
+                'npm-build': {
+                    icon: '🔨',
+                    label: 'Build',
+                    desc: 'プロジェクトをビルド'
+                },
+                'npm-start': {
+                    icon: '▶️',
+                    label: 'Start',
+                    desc: '本番モードで起動'
+                },
+                'npm-dev': {
+                    icon: '🚀',
+                    label: 'Dev',
+                    desc: '開発モードで起動'
+                },
+                'npm-stop': {
+                    icon: '⏹️',
+                    label: 'Stop',
+                    desc: 'Next.jsを停止'
                 }
             };
             const config = configs[command];

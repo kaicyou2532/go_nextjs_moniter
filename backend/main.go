@@ -214,10 +214,14 @@ func executeCommandHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Validate command
 	allowedCommands := map[string]bool{
-		"start":  true,
-		"stop":   true,
-		"reload": true,
-		"status": true,
+		"nginx-start":  true,
+		"nginx-stop":   true,
+		"nginx-reload": true,
+		"nginx-status": true,
+		"npm-build":    true,
+		"npm-start":    true,
+		"npm-dev":      true,
+		"npm-stop":     true,
 	}
 
 	if !allowedCommands[req.Command] {
@@ -228,17 +232,27 @@ func executeCommandHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Execute nginx command
+	// Execute command
 	var cmd *exec.Cmd
 	switch req.Command {
-	case "start":
+	// Nginx commands
+	case "nginx-start":
 		cmd = exec.Command("sudo", "systemctl", "start", "nginx")
-	case "stop":
+	case "nginx-stop":
 		cmd = exec.Command("sudo", "systemctl", "stop", "nginx")
-	case "reload":
+	case "nginx-reload":
 		cmd = exec.Command("sudo", "systemctl", "reload", "nginx")
-	case "status":
+	case "nginx-status":
 		cmd = exec.Command("sudo", "systemctl", "status", "nginx")
+	// NPM commands
+	case "npm-build":
+		cmd = exec.Command("npm", "run", "build")
+	case "npm-start":
+		cmd = exec.Command("npm", "run", "start")
+	case "npm-dev":
+		cmd = exec.Command("npm", "run", "dev")
+	case "npm-stop":
+		cmd = exec.Command("pkill", "-f", "next")
 	}
 
 	if req.Path != "" {
