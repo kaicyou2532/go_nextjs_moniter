@@ -534,27 +534,43 @@ func cleanupFilesHandler(w http.ResponseWriter, r *http.Request) {
 
 // logsHandler retrieves system logs
 func logsHandler(w http.ResponseWriter, r *http.Request) {
-	// nginxのログを読み込み
 	var logs []string
+	var errors []string
 
 	// error.logを読み込み
 	errorLog := "/var/log/nginx/error.log"
 	if data, err := exec.Command("sudo", "tail", "-n", "100", errorLog).CombinedOutput(); err == nil {
 		logs = append(logs, "=== Nginx Error Log ===\n"+string(data))
+	} else {
+		errors = append(errors, fmt.Sprintf("Error reading nginx error.log: %v\n%s", err, string(data)))
 	}
 
 	// access.logを読み込み
 	accessLog := "/var/log/nginx/access.log"
 	if data, err := exec.Command("sudo", "tail", "-n", "100", accessLog).CombinedOutput(); err == nil {
 		logs = append(logs, "\n=== Nginx Access Log ===\n"+string(data))
+	} else {
+		errors = append(errors, fmt.Sprintf("Error reading nginx access.log: %v\n%s", err, string(data)))
 	}
 
 	// systemd journal (nginx関連)
 	if data, err := exec.Command("sudo", "journalctl", "-u", "nginx", "-n", "50", "--no-pager").CombinedOutput(); err == nil {
 		logs = append(logs, "\n=== Systemd Journal (Nginx) ===\n"+string(data))
+	} else {
+		errors = append(errors, fmt.Sprintf("Error reading journalctl: %v\n%s", err, string(data)))
+	}
+
+	// エラーがある場合はログに追加
+	if len(errors) > 0 {
+		logs = append([]string{"=== Errors ===\n" + strings.Join(errors, "\n")}, logs...)
 	}
 
 	allLogs := strings.Join(logs, "\n")
+
+	// ログが空の場合
+	if allLogs == "" {
+		allLogs = "ログファイルが見つからないか、読み取り権限がありません。\nsudoers設定を確認してください。"
+	}
 
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
