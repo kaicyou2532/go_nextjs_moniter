@@ -149,12 +149,12 @@ if (isset($_GET['logout'])) {
         }
         
         .btn-primary {
-            background: #5fb5a8;
+            background: #4ade80;
             color: white;
         }
         
         .btn-success {
-            background: #5fb5a8;
+            background: #10b981;
             color: white;
         }
         
