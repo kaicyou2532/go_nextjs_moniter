@@ -25,7 +25,7 @@ BACKEND_PID=$!
 # フロントエンドを起動
 echo "PHPフロントエンドを起動中..."
 cd ../frontend
-php -S localhost:8080 &
+php -S 0.0.0.0:8080 &
 FRONTEND_PID=$!
 
 echo ""
@@ -33,8 +33,8 @@ echo "======================================"
 echo "Next.js管理ツールが起動しました！"
 echo "======================================"
 echo ""
-echo "バックエンド: http://localhost:8000"
-echo "フロントエンド: http://localhost:8080"
+echo "バックエンド: http://0.0.0.0:8000 (外部アクセス可能)"
+echo "フロントエンド: http://0.0.0.0:8080 (外部アクセス可能)"
 echo ""
 echo "ログイン情報:"
 echo "  ユーザー名: admin"

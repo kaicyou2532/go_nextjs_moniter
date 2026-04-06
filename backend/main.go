@@ -520,7 +520,7 @@ func main() {
 
 	// CORS設定
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:8080", "http://localhost:3000"},
+		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"*"},
 		AllowCredentials: true,
@@ -533,6 +533,6 @@ func main() {
 		port = "8000"
 	}
 
-	fmt.Printf("Server starting on port %s...\n", port)
-	log.Fatal(http.ListenAndServe(":"+port, handler))
+	fmt.Printf("Server starting on 0.0.0.0:%s...\n", port)
+	log.Fatal(http.ListenAndServe("0.0.0.0:"+port, handler))
 }
