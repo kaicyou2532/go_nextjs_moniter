@@ -307,6 +307,12 @@ if (isset($_GET['logout'])) {
                     <div class="service-subtitle">定期実行タスクの管理</div>
                 </a>
                 
+                <a href="cleanup.php" class="service-item">
+                    <div class="service-icon">🗑️</div>
+                    <div class="service-name">ファイルクリーンアップ</div>
+                    <div class="service-subtitle">古いファイル・ログの削除</div>
+                </a>
+                
                 <div class="service-item" style="opacity: 0.5; cursor: not-allowed;">
                     <div class="service-icon"></div>
                     <div class="service-name">インスタ自動投稿管理</div>
