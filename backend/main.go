@@ -114,6 +114,7 @@ func authenticate(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		token := r.Header.Get("Authorization")
 		if token == "" {
+			log.Printf("Authentication failed: No token provided")
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
@@ -122,11 +123,19 @@ func authenticate(next http.HandlerFunc) http.HandlerFunc {
 		session, exists := sessions[token]
 		mu.RUnlock()
 
-		if !exists || time.Now().After(session.ExpiresAt) {
+		if !exists {
+			log.Printf("Authentication failed: Token not found: %s", token)
 			http.Error(w, "Invalid or expired token", http.StatusUnauthorized)
 			return
 		}
 
+		if time.Now().After(session.ExpiresAt) {
+			log.Printf("Authentication failed: Token expired for user: %s", session.Username)
+			http.Error(w, "Invalid or expired token", http.StatusUnauthorized)
+			return
+		}
+
+		log.Printf("Authentication successful for user: %s", session.Username)
 		next(w, r)
 	}
 }
