@@ -214,10 +214,10 @@ func executeCommandHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Validate command
 	allowedCommands := map[string]bool{
-		"build": true,
-		"start": true,
-		"dev":   true,
-		"stop":  true,
+		"start":  true,
+		"stop":   true,
+		"reload": true,
+		"status": true,
 	}
 
 	if !allowedCommands[req.Command] {
@@ -228,18 +228,17 @@ func executeCommandHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Execute npm command
+	// Execute nginx command
 	var cmd *exec.Cmd
 	switch req.Command {
-	case "build":
-		cmd = exec.Command("npm", "run", "build")
 	case "start":
-		cmd = exec.Command("npm", "run", "start")
-	case "dev":
-		cmd = exec.Command("npm", "run", "dev")
+		cmd = exec.Command("sudo", "systemctl", "start", "nginx")
 	case "stop":
-		// Kill npm processes
-		cmd = exec.Command("pkill", "-f", "next")
+		cmd = exec.Command("sudo", "systemctl", "stop", "nginx")
+	case "reload":
+		cmd = exec.Command("sudo", "systemctl", "reload", "nginx")
+	case "status":
+		cmd = exec.Command("sudo", "systemctl", "status", "nginx")
 	}
 
 	if req.Path != "" {
@@ -510,6 +509,36 @@ func cleanupFilesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// logsHandler retrieves system logs
+func logsHandler(w http.ResponseWriter, r *http.Request) {
+	// nginxのログを読み込み
+	var logs []string
+
+	// error.logを読み込み
+	errorLog := "/var/log/nginx/error.log"
+	if data, err := exec.Command("sudo", "tail", "-n", "100", errorLog).CombinedOutput(); err == nil {
+		logs = append(logs, "=== Nginx Error Log ===\n"+string(data))
+	}
+
+	// access.logを読み込み
+	accessLog := "/var/log/nginx/access.log"
+	if data, err := exec.Command("sudo", "tail", "-n", "100", accessLog).CombinedOutput(); err == nil {
+		logs = append(logs, "\n=== Nginx Access Log ===\n"+string(data))
+	}
+
+	// systemd journal (nginx関連)
+	if data, err := exec.Command("sudo", "journalctl", "-u", "nginx", "-n", "50", "--no-pager").CombinedOutput(); err == nil {
+		logs = append(logs, "\n=== Systemd Journal (Nginx) ===\n"+string(data))
+	}
+
+	allLogs := strings.Join(logs, "\n")
+
+	respondJSON(w, http.StatusOK, map[string]interface{}{
+		"success": true,
+		"logs":    allLogs,
+	})
+}
+
 func main() {
 	// .envファイルを読み込み
 	if err := godotenv.Load(); err != nil {
@@ -526,6 +555,7 @@ func main() {
 	mux.HandleFunc("/api/cronjobs/add", authenticate(addCronJobHandler))
 	mux.HandleFunc("/api/cronjobs/delete", authenticate(deleteCronJobHandler))
 	mux.HandleFunc("/api/cleanup", authenticate(cleanupFilesHandler))
+	mux.HandleFunc("/api/logs", authenticate(logsHandler))
 
 	// CORS設定 - すべてのオリジンを動的に許可
 	c := cors.New(cors.Options{

@@ -1,12 +1,15 @@
-# Next.js管理ツール
+# Nginx管理ツール
 
-Next.jsプロジェクトを管理するためのWebベースツールです。フロントエンドはPHP、バックエンドはGoで構築されています。
+Nginxを管理するためのWebベースツールです。フロントエンドはPHP、バックエンドはGoで構築されています。
 
 ## 機能
 
 - 🔐 **認証システム**: ユーザー名とパスワードによるログイン（SHA-256ハッシュ化）
-- 🚀 **Next.js管理**: npm run build, npm run start, npm run devコマンドの実行
-- 🛑 **プロセス制御**: Next.jsプロセスの停止
+- 🚀 **Nginx管理**: Nginxの起動、停止、リロード、ステータス確認
+- 📋 **リアルタイムログ**: Nginxのエラーログ、アクセスログ、systemdジャーナルの表示
+- ⏰ **Cronjob管理**: Crontabの追加、削除、一覧表示
+- 🗑️ **ファイルクリーンアップ**: 古いログやキャッシュファイルの削除
+- 🛑 **プロセス制御**: Nginxプロセスの管理
 - 📊 **リアルタイム出力**: コマンド実行結果の表示
 
 ## 必要要件
@@ -62,21 +65,45 @@ cd backend
 go mod download
 ```
 
-### 3. デフォルト認証情報
+### 3. sudoコマンドの設定
 
-- **ユーザー名**: `admin`
-- **パスワード**: `admin`
+Nginxの管理にはroot権限が必要です。パスワードなしでsudoを実行できるようにします：
+
+```bash
+sudo visudo
+```
+
+以下の行を最後に追加（`sysmanager`はあなたのユーザー名に置き換えてください）：
+
+```
+sysmanager ALL=(ALL) NOPASSWD: /usr/bin/systemctl start nginx
+sysmanager ALL=(ALL) NOPASSWD: /usr/bin/systemctl stop nginx
+sysmanager ALL=(ALL) NOPASSWD: /usr/bin/systemctl reload nginx
+sysmanager ALL=(ALL) NOPASSWD: /usr/bin/systemctl status nginx
+sysmanager ALL=(ALL) NOPASSWD: /usr/bin/tail
+sysmanager ALL=(ALL) NOPASSWD: /usr/bin/journalctl
+```
 
 ## 起動方法
 
-### 1. Goバックエンドの起動
+### 簡単な起動（推奨）
+
+プロジェクトルートで：
+
+```bash
+./start.sh
+```
+
+### 手動起動
+
+**1. Goバックエンドの起動**
 
 ```bash
 cd backend
 go run main.go
 ```
 
-バックエンドは `http://localhost:8000` で起動します。
+バックエンドは `http://0.0.0.0:8000` で起動します。
 
 ### 2. PHPフロントエンドの起動
 
@@ -84,35 +111,38 @@ go run main.go
 
 ```bash
 cd frontend
-php -S localhost:8080
+php -S 0.0.0.0:8080
 ```
 
-フロントエンドは `http://localhost:8080` で起動します。
+フロントエンドは `http://0.0.0.0:8080` で起動します。
 
 ### 3. アクセス
 
-ブラウザで `http://localhost:8080/login.php` にアクセスしてください。
+ブラウザで `http://your-server-ip:8080/login.php` にアクセスしてください。
+
+### デフォルト認証情報
+
+- **ユーザー名**: `admin`
+- **パスワード**: `admin`
 
 ## 使い方
 
-1. **環境変数の設定**
-   - `.env`ファイルにNext.jsプロジェクトのパスを設定:
-   ```
-   NEXTJS_PROJECT_PATH=/path/to/your/nextjs/project
-   ```
-
-2. **ログイン**
+1. **ログイン**
    - ユーザー名: `admin`
    - パスワード: `admin`
 
-3. **サービス選択**
-   - ログイン後、サービス選択画面から「Next.js管理」をクリック
+2. **サービス選択**
+   - ログイン後、サービス選択画面から機能を選択
+   - **Nginx管理**: Nginxの起動・停止・リロード
+   - **Cronjob管理**: Crontabの管理
+   - **ファイルクリーンアップ**: 古いファイルの削除
 
-4. **コマンドの実行**
-   - **Build**: Next.jsアプリケーションをビルド
-   - **Start**: ビルド済みアプリケーションを本番モードで起動
-   - **Dev**: 開発モードで起動
-   - **Stop**: 実行中のNext.jsプロセスを停止
+3. **Nginx管理**
+   - **Start**: Nginxを起動
+   - **Stop**: Nginxを停止
+   - **Reload**: 設定ファイルを再読み込み
+   - **Status**: Nginxの状態を確認
+   - **ログビューアー**: リアルタイムでログを確認
 
 ## API エンドポイント
 
@@ -121,14 +151,22 @@ php -S localhost:8080
 - `POST /api/logout` - ログアウト
 - `GET /api/validate` - セッション検証
 
-### コマンド実行
-- `POST /api/execute` - NPMコマンド実行
+### Nginx管理
+- `POST /api/execute` - Nginxコマンド実行
+- `GET /api/logs` - ログ取得
 
-#### リクエスト例:
+### Cronjob管理
+- `GET /api/cronjobs` - Cronjob一覧取得
+- `POST /api/cronjobs/add` - Cronjob追加
+- `POST /api/cronjobs/delete` - Cronjob削除
+
+### ファイルクリーンアップ
+- `POST /api/cleanup` - ファイルクリーンアップ実行
+
+#### リクエスト例（Nginx管理）:
 ```json
 {
-  "command": "build",
-  "path": "/path/to/nextjs/project"
+  "command": "start"
 }
 ```
 
@@ -136,7 +174,7 @@ php -S localhost:8080
 ```json
 {
   "success": true,
-  "output": "Build completed successfully"
+  "output": "nginx started successfully"
 }
 ```
 

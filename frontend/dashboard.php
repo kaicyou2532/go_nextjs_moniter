@@ -259,32 +259,48 @@ if (isset($_GET['logout'])) {
     
     <div class="container">
         <div class="card">
-            <h2>ウェブサイト管理ツール</h2>
+            <h2>Nginx管理ツール</h2>
             
             <div class="button-group">
-                <button class="btn btn-primary" onclick="executeCommand('build')">
-                    <span class="icon">🔨</span>
-                    <span>Build</span>
-                    <span class="description">記事を更新</span>
-                </button>
                 <button class="btn btn-success" onclick="executeCommand('start')">
                     <span class="icon">▶️</span>
                     <span>Start</span>
-                    <span class="description">サイトを立ち上げ</span>
-                </button>
-                <button class="btn btn-warning" onclick="executeCommand('dev')">
-                    <span class="icon">🚀</span>
-                    <span>Dev</span>
-                    <span class="description">開発モードで起動 (エンジニア専用)</span>
+                    <span class="description">Nginxを起動</span>
                 </button>
                 <button class="btn btn-danger" onclick="executeCommand('stop')">
                     <span class="icon">⏹️</span>
                     <span>Stop</span>
-                    <span class="description">ウェブサイトを停止</span>
+                    <span class="description">Nginxを停止</span>
+                </button>
+                <button class="btn btn-warning" onclick="executeCommand('reload')">
+                    <span class="icon">🔄</span>
+                    <span>Reload</span>
+                    <span class="description">設定を再読み込み</span>
+                </button>
+                <button class="btn btn-primary" onclick="executeCommand('status')">
+                    <span class="icon">📊</span>
+                    <span>Status</span>
+                    <span class="description">Nginxの状態を確認</span>
                 </button>
             </div>
             
             <div id="output" class="output"></div>
+        </div>
+        
+        <div class="card">
+            <h2>システムログ</h2>
+            <div style="margin-bottom: 15px;">
+                <button class="btn btn-primary" style="width: auto; padding: 10px 20px; margin-right: 10px;" onclick="loadLogs()">
+                    📋 ログを読み込み
+                </button>
+                <button class="btn btn-warning" style="width: auto; padding: 10px 20px; margin-right: 10px;" onclick="toggleAutoRefresh()">
+                    <span id="autoRefreshIcon">⏸️</span> 自動更新: <span id="autoRefreshStatus">停止</span>
+                </button>
+                <button class="btn btn-danger" style="width: auto; padding: 10px 20px;" onclick="clearLogs()">
+                    🗑️ ログをクリア
+                </button>
+            </div>
+            <div id="logOutput" class="output" style="max-height: 400px; overflow-y: auto; font-family: 'Monaco', 'Courier New', monospace; font-size: 12px; white-space: pre-wrap;"></div>
         </div>
     </div>
     
@@ -339,25 +355,25 @@ if (isset($_GET['logout'])) {
         
         function updateButtonContent(button, command) {
             const configs = {
-                'build': {
-                    icon: '🔨',
-                    label: 'Build',
-                    desc: 'プロジェクトをビルド (npm run build)'
-                },
                 'start': {
                     icon: '▶️',
                     label: 'Start',
-                    desc: '本番モードで起動 (npm run start)'
-                },
-                'dev': {
-                    icon: '🚀',
-                    label: 'Dev',
-                    desc: '開発モードで起動 (npm run dev)'
+                    desc: 'Nginxを起動'
                 },
                 'stop': {
                     icon: '⏹️',
                     label: 'Stop',
-                    desc: 'プロセスを停止'
+                    desc: 'Nginxを停止'
+                },
+                'reload': {
+                    icon: '🔄',
+                    label: 'Reload',
+                    desc: '設定を再読み込み'
+                },
+                'status': {
+                    icon: '📊',
+                    label: 'Status',
+                    desc: 'Nginxの状態を確認'
                 }
             };
             const config = configs[command];
@@ -368,6 +384,54 @@ if (isset($_GET['logout'])) {
             const outputDiv = document.getElementById('output');
             outputDiv.textContent = message;
             outputDiv.className = `output show ${type}`;
+        }
+        
+        // ログ管理
+        let autoRefreshInterval = null;
+        
+        async function loadLogs() {
+            const logOutput = document.getElementById('logOutput');
+            try {
+                const response = await fetch(`${API_URL}/logs`, {
+                    headers: {
+                        'Authorization': token
+                    },
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    logOutput.textContent = data.logs || 'ログが空です';
+                    logOutput.scrollTop = logOutput.scrollHeight;
+                } else {
+                    logOutput.textContent = `エラー: ${data.error}`;
+                }
+            } catch (error) {
+                logOutput.textContent = `エラー: ${error.message}`;
+            }
+        }
+        
+        function toggleAutoRefresh() {
+            const statusSpan = document.getElementById('autoRefreshStatus');
+            const iconSpan = document.getElementById('autoRefreshIcon');
+            
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+                statusSpan.textContent = '停止';
+                iconSpan.textContent = '⏸️';
+            } else {
+                loadLogs();
+                autoRefreshInterval = setInterval(loadLogs, 3000);
+                statusSpan.textContent = '有効';
+                iconSpan.textContent = '▶️';
+            }
+        }
+        
+        function clearLogs() {
+            const logOutput = document.getElementById('logOutput');
+            logOutput.textContent = 'ログをクリアしました';
         }
         
         // セッション検証
