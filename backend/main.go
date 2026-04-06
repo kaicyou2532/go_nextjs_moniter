@@ -518,9 +518,11 @@ func main() {
 	mux.HandleFunc("/api/cronjobs/delete", authenticate(deleteCronJobHandler))
 	mux.HandleFunc("/api/cleanup", authenticate(cleanupFilesHandler))
 
-	// CORS設定
+	// CORS設定 - すべてのオリジンを動的に許可
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
+		AllowOriginFunc: func(origin string) bool {
+			return true // すべてのオリジンを許可
+		},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"*"},
 		AllowCredentials: true,
