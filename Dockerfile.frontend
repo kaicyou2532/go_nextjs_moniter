@@ -1,0 +1,16 @@
+FROM php:8.3-cli-alpine
+
+WORKDIR /app
+
+# 必要な拡張機能をインストール
+RUN apk add --no-cache curl
+
+# PHPファイルをコピー
+COPY frontend/ .
+
+# セッションディレクトリを作成
+RUN mkdir -p sessions && chmod 700 sessions
+
+EXPOSE 8080
+
+CMD ["php", "-S", "0.0.0.0:8080"]

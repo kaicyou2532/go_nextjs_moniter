@@ -1,0 +1,7 @@
+.git
+.gitignore
+*.md
+.env
+frontend/sessions
+backend/main
+*.log

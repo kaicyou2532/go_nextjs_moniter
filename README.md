@@ -11,22 +11,56 @@ Nginxを管理するためのWebベースツールです。フロントエンド
 - 🗑️ **ファイルクリーンアップ**: 古いログやキャッシュファイルの削除
 - 🛑 **プロセス制御**: Nginxプロセスの管理
 - 📊 **リアルタイム出力**: コマンド実行結果の表示
+- 🔄 **Next.jsステータス**: プロセスの起動状態を自動監視
 
 ## 必要要件
 
-### バックエンド (Go)
+### Docker環境（推奨）
+- Docker 20.10以降
+- Docker Compose 2.0以降
+
+### または通常環境
+
+#### バックエンド (Go)
 - Go 1.21以降
 - 必要なパッケージ:
   - github.com/google/uuid
   - github.com/rs/cors
+  - github.com/joho/godotenv
 
-### フロントエンド (PHP)
+#### フロントエンド (PHP)
 - PHP 7.4以降
 - cURL拡張機能が有効
 - PHPビルトインサーバーまたはApache/Nginx
 
-### その他
+#### その他
 - npm/Node.js（管理対象のNext.jsプロジェクト用）
+
+## インストール
+
+### Docker Composeで起動（推奨）
+
+```bash
+# リポジトリのクローン
+git clone <repository-url>
+cd go_nextjs_moniter
+
+# 環境変数の設定
+cd backend
+cp .env.example .env
+# .envファイルを編集してNEXTJS_PROJECT_PATHを設定
+cd ..
+
+# Next.jsプロジェクトをworkspaceディレクトリに配置
+# または、シンボリックリンクを作成
+ln -s /path/to/your/nextjs/project workspace
+
+# Docker Composeで起動
+chmod +x docker-start.sh
+./docker-start.sh
+```
+
+### 通常起動
 
 ## インストール
 

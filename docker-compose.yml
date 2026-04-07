@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: nextjs-manager-backend
+    ports:
+      - "8070:8070"
+    environment:
+      - PORT=8070
+      - NEXTJS_PROJECT_PATH=/workspace
+    volumes:
+      - ./workspace:/workspace
+      - ./backend/.env:/app/.env
+    networks:
+      - nextjs-manager
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: nextjs-manager-frontend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend/sessions:/app/sessions
+    networks:
+      - nextjs-manager
+    restart: unless-stopped
+
+networks:
+  nextjs-manager:
+    driver: bridge
