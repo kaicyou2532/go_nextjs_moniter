@@ -255,6 +255,11 @@ func executeCommandHandler(w http.ResponseWriter, r *http.Request) {
 		cmd = exec.Command("sudo", "systemctl", "status", "nginx")
 	// NPM commands
 	case "npm-build":
+		// ビルド前に.nextディレクトリを削除
+		if req.Path != "" {
+			nextDir := filepath.Join(req.Path, ".next")
+			os.RemoveAll(nextDir)
+		}
 		cmd = exec.Command("npm", "run", "build")
 	case "npm-start":
 		cmd = exec.Command("npm", "run", "start", "--", "-p", "3000")
@@ -578,6 +583,19 @@ func logsHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// statusHandler checks if Next.js process is running
+func statusHandler(w http.ResponseWriter, r *http.Request) {
+	cmd := exec.Command("pgrep", "-f", "next")
+	output, _ := cmd.CombinedOutput()
+	isRunning := len(output) > 0
+
+	respondJSON(w, http.StatusOK, map[string]interface{}{
+		"success": true,
+		"running": isRunning,
+		"status":  map[string]bool{"nextjs": isRunning},
+	})
+}
+
 func main() {
 	// .envファイルを読み込み
 	if err := godotenv.Load(); err != nil {
@@ -595,6 +613,7 @@ func main() {
 	mux.HandleFunc("/api/cronjobs/delete", authenticate(deleteCronJobHandler))
 	mux.HandleFunc("/api/cleanup", authenticate(cleanupFilesHandler))
 	mux.HandleFunc("/api/logs", authenticate(logsHandler))
+	mux.HandleFunc("/api/status", authenticate(statusHandler))
 
 	// CORS設定 - すべてのオリジンを動的に許可
 	c := cors.New(cors.Options{

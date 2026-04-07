@@ -261,23 +261,27 @@ if (isset($_GET['logout'])) {
         <div class="card">
             <h2>ウェブサイト管理</h2>
             
+            <div style="margin-bottom: 20px; padding: 15px; background: #f3f4f6; border-radius: 8px;">
+                <strong>ステータス:</strong> <span id="status" style="margin-left: 10px;"></span>
+            </div>
+            
             <div class="button-group">
-                <button class="btn btn-success" onclick="executeCommand('nginx-start')">
+                <button class="btn btn-success" id="btn-nginx-start" onclick="executeCommand('nginx-start')">
                     <span class="icon">▶️</span>
                     <span>Nginx Start</span>
                     <span class="description">ウェブサイトを公開</span>
                 </button>
-                <button class="btn btn-danger" onclick="executeCommand('nginx-stop')">
+                <button class="btn btn-danger" id="btn-nginx-stop" onclick="executeCommand('nginx-stop')">
                     <span class="icon">⏹️</span>
                     <span>Nginx Stop</span>
                     <span class="description">ウェブサイトを非公開</span>
                 </button>
-                <button class="btn btn-warning" onclick="executeCommand('npm-build')">
+                <button class="btn btn-warning" id="btn-npm-build" onclick="executeCommand('npm-build')">
                     <span class="icon">🔨</span>
                     <span>npm run build</span>
                     <span class="description">ウェブサイトの記事を更新</span>
                 </button>
-                <button class="btn btn-primary" onclick="executeCommand('npm-start')">
+                <button class="btn btn-primary" id="btn-npm-start" onclick="executeCommand('npm-start')">
                     <span class="icon">▶️</span>
                     <span>npm run start</span>
                     <span class="description">ウェブサイトを起動</span>
@@ -393,10 +397,47 @@ if (isset($_GET['logout'])) {
             const outputDiv = document.getElementById('output');
             outputDiv.textContent = message;
             outputDiv.className = `output show ${type}`;
+            
+            // コマンド実行後にステータスを更新
+            setTimeout(checkStatus, 1000);
+        }
+        
+        // ステータスチェック
+        async function checkStatus() {
+            try {
+                const response = await fetch(`${API_URL}/status`, {
+                    headers: {
+                        'Authorization': token
+                    },
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const isRunning = data.running;
+                    const statusSpan = document.getElementById('status');
+                    
+                    if (isRunning) {
+                        statusSpan.innerHTML = '<span style="color: #10b981; font-weight: bold;">● Next.js起動中</span>';
+                        // Next.js起動中はbuildとstartを無効化
+                        document.getElementById('btn-npm-build').disabled = true;
+                        document.getElementById('btn-npm-start').disabled = true;
+                    } else {
+                        statusSpan.innerHTML = '<span style="color: #6b7280;">○ Next.js停止中</span>';
+                        // Next.js停止中はbuildとstartを有効化
+                        document.getElementById('btn-npm-build').disabled = false;
+                        document.getElementById('btn-npm-start').disabled = false;
+                    }
+                }
+            } catch (error) {
+                console.error('Status check failed:', error);
+            }
         }
         
         // ログ管理
         let autoRefreshInterval = null;
+        let statusCheckInterval = null;
         
         async function loadLogs() {
             const logOutput = document.getElementById('logOutput');
@@ -425,6 +466,10 @@ if (isset($_GET['logout'])) {
         window.addEventListener('DOMContentLoaded', function() {
             loadLogs();
             autoRefreshInterval = setInterval(loadLogs, 3000);
+            
+            // ステータスチェックを開始
+            checkStatus();
+            statusCheckInterval = setInterval(checkStatus, 5000);
         });
         
         // セッション検証
