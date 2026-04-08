@@ -10,9 +10,9 @@ services:
       - "8070:8070"
     environment:
       - PORT=8070
-      - NEXTJS_PROJECT_PATH=/workspace
+      - NEXTJS_PROJECT_PATH=/workspace/next-website
     volumes:
-      - ./workspace:/workspace
+      - /home/sysmanager/next-website:/workspace/next-website
       - ./backend/.env:/app/.env
     networks:
       - nextjs-manager
