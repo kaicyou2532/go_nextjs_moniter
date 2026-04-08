@@ -1,0 +1,18 @@
+[Unit]
+Description=Next.js Manager Frontend (PHP)
+After=network.target
+PartOf=nextjs-manager.target
+
+[Service]
+Type=simple
+User=sysmanager
+WorkingDirectory=/home/sysmanager/go_nextjs_moniter/frontend
+ExecStart=/usr/bin/php -S 0.0.0.0:8080
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=nextjs-manager-frontend
+
+[Install]
+WantedBy=multi-user.target nextjs-manager.target

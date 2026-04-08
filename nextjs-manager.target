@@ -1,0 +1,7 @@
+[Unit]
+Description=Next.js Manager (Backend + Frontend)
+After=network.target
+Wants=nextjs-manager-backend.service nextjs-manager-frontend.service
+
+[Install]
+WantedBy=multi-user.target

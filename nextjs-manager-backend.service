@@ -1,6 +1,7 @@
 [Unit]
 Description=Next.js Manager Backend
 After=network.target
+PartOf=nextjs-manager.target
 
 [Service]
 Type=simple
@@ -18,4 +19,4 @@ Environment="PORT=8070"
 Environment="NEXTJS_PROJECT_PATH=/home/sysmanager/next-website"
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=multi-user.target nextjs-manager.target
