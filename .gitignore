@@ -1,5 +1,6 @@
 # ビルド成果物
 /backend/nextjs-manager-backend
+/backend/nextjs-manager
 /backend/main
 
 # Go関連

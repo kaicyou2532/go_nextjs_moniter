@@ -1,0 +1,21 @@
+[Unit]
+Description=Next.js Manager Backend
+After=network.target
+
+[Service]
+Type=simple
+User=sysmanager
+WorkingDirectory=/home/sysmanager/go_nextjs_moniter/backend
+ExecStart=/home/sysmanager/go_nextjs_moniter/backend/nextjs-manager
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=nextjs-manager
+
+# Environment variables
+Environment="PORT=8070"
+Environment="NEXTJS_PROJECT_PATH=/home/sysmanager/next-website"
+
+[Install]
+WantedBy=multi-user.target
