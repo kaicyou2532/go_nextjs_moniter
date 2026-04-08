@@ -13,7 +13,6 @@ services:
       - NEXTJS_PROJECT_PATH=/workspace/next-website
     volumes:
       - /home/sysmanager/next-website:/workspace/next-website
-      - ./backend/.env:/app/.env
     networks:
       - nextjs-manager
     restart: unless-stopped
