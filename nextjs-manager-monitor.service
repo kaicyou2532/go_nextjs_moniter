@@ -1,0 +1,10 @@
+[Unit]
+Description=Next.js Manager Monitor Service
+After=network.target
+
+[Service]
+Type=oneshot
+User=sysmanager
+ExecStart=/home/sysmanager/go_nextjs_moniter/monitor.sh
+StandardOutput=journal
+StandardError=journal

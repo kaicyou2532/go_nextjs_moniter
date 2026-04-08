@@ -1,5 +1,33 @@
 # Next.js Manager 運用マニュアル
 
+## ⚙️ 初回セットアップ（必須）
+
+デプロイ前に一度だけ実行してください：
+
+```bash
+cd ~/go_nextjs_moniter
+
+# sudoers設定を追加（パスワードなしsudo実行のため）
+sudo visudo -f /etc/sudoers.d/nextjs-manager
+```
+
+以下を追加して保存（Ctrl+X → Y → Enter）：
+```
+sysmanager ALL=(ALL) NOPASSWD: /usr/bin/systemctl start nginx
+sysmanager ALL=(ALL) NOPASSWD: /usr/bin/systemctl stop nginx
+sysmanager ALL=(ALL) NOPASSWD: /usr/bin/systemctl reload nginx
+sysmanager ALL=(ALL) NOPASSWD: /usr/bin/systemctl status nginx
+sysmanager ALL=(ALL) NOPASSWD: /usr/bin/journalctl *
+sysmanager ALL=(ALL) NOPASSWD: /usr/bin/tail *
+sysmanager ALL=(ALL) NOPASSWD: /usr/bin/pkill *
+```
+
+権限設定：
+```bash
+# セッションディレクトリの権限修正
+chmod 700 ~/go_nextjs_moniter/frontend/sessions
+```
+
 ## 🚀 デプロイ
 
 ```bash
@@ -169,6 +197,39 @@ nano ~/go_nextjs_moniter/backend/.env
 
 # サービス再起動
 sudo systemctl restart nextjs-manager-backend
+```
+
+## 🔍 監視機能
+
+### 自動監視（5分ごと）
+
+システムは以下を自動的に監視します：
+- サービスの死活監視（停止時は自動再起動）
+- ディスク使用率監視（80%超過時に自動クリーンアップ）
+- メモリ使用状況の記録
+
+```bash
+# 監視タイマーの状態確認
+sudo systemctl status nextjs-manager-monitor.timer
+
+# 監視ログの確認
+sudo tail -f /var/log/nextjs-manager-monitor.log
+
+# 手動で監視を実行
+sudo systemctl start nextjs-manager-monitor.service
+```
+
+### 監視タイマーの操作
+
+```bash
+# 起動
+sudo systemctl start nextjs-manager-monitor.timer
+
+# 停止
+sudo systemctl stop nextjs-manager-monitor.timer
+
+# 有効化（サーバー起動時に自動開始）
+sudo systemctl enable nextjs-manager-monitor.timer
 ```
 
 ## 🌐 アクセスURL

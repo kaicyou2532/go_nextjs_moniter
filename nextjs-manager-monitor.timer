@@ -1,0 +1,12 @@
+[Unit]
+Description=Next.js Manager Monitor Timer
+Requires=nextjs-manager-monitor.service
+
+[Timer]
+# 5分ごとに実行
+OnBootSec=5min
+OnUnitActiveSec=5min
+Unit=nextjs-manager-monitor.service
+
+[Install]
+WantedBy=timers.target
