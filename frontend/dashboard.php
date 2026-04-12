@@ -266,7 +266,22 @@ if (isset($_GET['logout'])) {
             </div>
             
             <div class="button-group">
-                <button class="btn btn-success" id="btn-nextjs-start" onclick="executeCommand('nextjs-start')">
+                <button class="btn btn-success" id="btn-nginx-start" onclick="executeCommand('nginx-start')">
+                    <span class="icon">▶️</span>
+                    <span>Nginx Start</span>
+                    <span class="description">Nginxを起動</span>
+                </button>
+                <button class="btn btn-danger" id="btn-nginx-stop" onclick="executeCommand('nginx-stop')">
+                    <span class="icon">⏹️</span>
+                    <span>Nginx Stop</span>
+                    <span class="description">Nginxを停止</span>
+                </button>
+                <button class="btn btn-warning" id="btn-nextjs-build-start" onclick="executeCommand('nextjs-build-start')">
+                    <span class="icon">🔨</span>
+                    <span>Next.js Build & Start</span>
+                    <span class="description">ビルドして起動</span>
+                </button>
+                <button class="btn btn-primary" id="btn-nextjs-start" onclick="executeCommand('nextjs-start')">
                     <span class="icon">▶️</span>
                     <span>Next.js Start</span>
                     <span class="description">Next.jsを起動</span>
@@ -275,16 +290,6 @@ if (isset($_GET['logout'])) {
                     <span class="icon">⏹️</span>
                     <span>Next.js Stop</span>
                     <span class="description">Next.jsを停止</span>
-                </button>
-                <button class="btn btn-warning" id="btn-nextjs-restart" onclick="executeCommand('nextjs-restart')">
-                    <span class="icon">🔄</span>
-                    <span>Next.js Restart</span>
-                    <span class="description">Next.jsを再起動</span>
-                </button>
-                <button class="btn btn-info" id="btn-nextjs-status" onclick="executeCommand('nextjs-status')">
-                    <span class="icon">📊</span>
-                    <span>Next.js Status</span>
-                    <span class="description">状態を確認</span>
                 </button>
             </div>
             
@@ -358,15 +363,10 @@ if (isset($_GET['logout'])) {
                     label: 'Nginx Stop',
                     desc: 'Nginxを停止'
                 },
-                'nginx-reload': {
-                    icon: '🔄',
-                    label: 'Nginx Reload',
-                    desc: '設定を再読み込み'
-                },
-                'nginx-status': {
-                    icon: '📊',
-                    label: 'Nginx Status',
-                    desc: 'Nginxの状態を確認'
+                'nextjs-build-start': {
+                    icon: '🔨',
+                    label: 'Next.js Build & Start',
+                    desc: 'ビルドして起動'
                 },
                 'nextjs-start': {
                     icon: '▶️',
@@ -387,26 +387,6 @@ if (isset($_GET['logout'])) {
                     icon: '📊',
                     label: 'Next.js Status',
                     desc: '状態を確認'
-                },
-                'npm-build': {
-                    icon: '🔨',
-                    label: 'Build',
-                    desc: 'プロジェクトをビルド'
-                },
-                'npm-start': {
-                    icon: '▶️',
-                    label: 'Start',
-                    desc: '本番モードで起動'
-                },
-                'npm-dev': {
-                    icon: '🚀',
-                    label: 'Dev',
-                    desc: '開発モードで起動'
-                },
-                'npm-stop': {
-                    icon: '⏹️',
-                    label: 'Stop',
-                    desc: 'Next.jsを停止'
                 }
             };
             const config = configs[command];

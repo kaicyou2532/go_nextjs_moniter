@@ -223,18 +223,19 @@ func executeCommandHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Validate command
 	allowedCommands := map[string]bool{
-		"nginx-start":    true,
-		"nginx-stop":     true,
-		"nginx-reload":   true,
-		"nginx-status":   true,
-		"npm-build":      true,
-		"npm-start":      true,
-		"npm-dev":        true,
-		"npm-stop":       true,
-		"nextjs-start":   true,
-		"nextjs-stop":    true,
-		"nextjs-restart": true,
-		"nextjs-status":  true,
+		"nginx-start":        true,
+		"nginx-stop":         true,
+		"nginx-reload":       true,
+		"nginx-status":       true,
+		"npm-build":          true,
+		"npm-start":          true,
+		"npm-dev":            true,
+		"npm-stop":           true,
+		"nextjs-start":       true,
+		"nextjs-stop":        true,
+		"nextjs-restart":     true,
+		"nextjs-status":      true,
+		"nextjs-build-start": true,
 	}
 
 	if !allowedCommands[req.Command] {
@@ -266,6 +267,39 @@ func executeCommandHandler(w http.ResponseWriter, r *http.Request) {
 		cmd = exec.Command("sudo", "systemctl", "restart", "nextjs-app")
 	case "nextjs-status":
 		cmd = exec.Command("sudo", "systemctl", "status", "nextjs-app")
+	case "nextjs-build-start":
+		// Next.jsをビルドしてsystemdで起動
+		if req.Path != "" {
+			// 1. サービスを停止
+			exec.Command("sudo", "systemctl", "stop", "nextjs-app").Run()
+
+			// 2. .nextディレクトリを削除
+			nextDir := filepath.Join(req.Path, ".next")
+			os.RemoveAll(nextDir)
+
+			// 3. ビルド
+			buildCmd := exec.Command("npm", "run", "build")
+			buildCmd.Dir = req.Path
+			buildOutput, buildErr := buildCmd.CombinedOutput()
+
+			if buildErr != nil {
+				respondJSON(w, http.StatusOK, CommandResponse{
+					Success: false,
+					Output:  string(buildOutput),
+					Error:   "ビルドに失敗しました: " + buildErr.Error(),
+				})
+				return
+			}
+
+			// 4. サービスを起動
+			cmd = exec.Command("sudo", "systemctl", "start", "nextjs-app")
+		} else {
+			respondJSON(w, http.StatusBadRequest, CommandResponse{
+				Success: false,
+				Error:   "プロジェクトパスが指定されていません",
+			})
+			return
+		}
 	// NPM commands (legacy)
 	case "npm-build":
 		// ビルド前に.nextディレクトリを削除
