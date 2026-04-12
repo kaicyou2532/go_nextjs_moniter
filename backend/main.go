@@ -223,14 +223,18 @@ func executeCommandHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Validate command
 	allowedCommands := map[string]bool{
-		"nginx-start":  true,
-		"nginx-stop":   true,
-		"nginx-reload": true,
-		"nginx-status": true,
-		"npm-build":    true,
-		"npm-start":    true,
-		"npm-dev":      true,
-		"npm-stop":     true,
+		"nginx-start":    true,
+		"nginx-stop":     true,
+		"nginx-reload":   true,
+		"nginx-status":   true,
+		"npm-build":      true,
+		"npm-start":      true,
+		"npm-dev":        true,
+		"npm-stop":       true,
+		"nextjs-start":   true,
+		"nextjs-stop":    true,
+		"nextjs-restart": true,
+		"nextjs-status":  true,
 	}
 
 	if !allowedCommands[req.Command] {
@@ -253,7 +257,16 @@ func executeCommandHandler(w http.ResponseWriter, r *http.Request) {
 		cmd = exec.Command("sudo", "systemctl", "reload", "nginx")
 	case "nginx-status":
 		cmd = exec.Command("sudo", "systemctl", "status", "nginx")
-	// NPM commands
+	// Next.js systemd commands
+	case "nextjs-start":
+		cmd = exec.Command("sudo", "systemctl", "start", "nextjs-app")
+	case "nextjs-stop":
+		cmd = exec.Command("sudo", "systemctl", "stop", "nextjs-app")
+	case "nextjs-restart":
+		cmd = exec.Command("sudo", "systemctl", "restart", "nextjs-app")
+	case "nextjs-status":
+		cmd = exec.Command("sudo", "systemctl", "status", "nextjs-app")
+	// NPM commands (legacy)
 	case "npm-build":
 		// ビルド前に.nextディレクトリを削除
 		if req.Path != "" {
@@ -585,9 +598,10 @@ func logsHandler(w http.ResponseWriter, r *http.Request) {
 
 // statusHandler checks if Next.js process is running
 func statusHandler(w http.ResponseWriter, r *http.Request) {
-	cmd := exec.Command("pgrep", "-f", "next")
+	// systemdサービスの状態をチェック
+	cmd := exec.Command("systemctl", "is-active", "nextjs-app")
 	output, _ := cmd.CombinedOutput()
-	isRunning := len(output) > 0
+	isRunning := strings.TrimSpace(string(output)) == "active"
 
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,

@@ -266,25 +266,25 @@ if (isset($_GET['logout'])) {
             </div>
             
             <div class="button-group">
-                <button class="btn btn-success" id="btn-nginx-start" onclick="executeCommand('nginx-start')">
+                <button class="btn btn-success" id="btn-nextjs-start" onclick="executeCommand('nextjs-start')">
                     <span class="icon">▶️</span>
-                    <span>Nginx Start</span>
-                    <span class="description">ウェブサイトを公開</span>
+                    <span>Next.js Start</span>
+                    <span class="description">Next.jsを起動</span>
                 </button>
-                <button class="btn btn-danger" id="btn-nginx-stop" onclick="executeCommand('nginx-stop')">
+                <button class="btn btn-danger" id="btn-nextjs-stop" onclick="executeCommand('nextjs-stop')">
                     <span class="icon">⏹️</span>
-                    <span>Nginx Stop</span>
-                    <span class="description">ウェブサイトを非公開</span>
+                    <span>Next.js Stop</span>
+                    <span class="description">Next.jsを停止</span>
                 </button>
-                <button class="btn btn-warning" id="btn-npm-build" onclick="executeCommand('npm-build')">
-                    <span class="icon">🔨</span>
-                    <span>npm run build</span>
-                    <span class="description">ウェブサイトの記事を更新</span>
+                <button class="btn btn-warning" id="btn-nextjs-restart" onclick="executeCommand('nextjs-restart')">
+                    <span class="icon">🔄</span>
+                    <span>Next.js Restart</span>
+                    <span class="description">Next.jsを再起動</span>
                 </button>
-                <button class="btn btn-primary" id="btn-npm-start" onclick="executeCommand('npm-start')">
-                    <span class="icon">▶️</span>
-                    <span>npm run start</span>
-                    <span class="description">ウェブサイトを起動</span>
+                <button class="btn btn-info" id="btn-nextjs-status" onclick="executeCommand('nextjs-status')">
+                    <span class="icon">📊</span>
+                    <span>Next.js Status</span>
+                    <span class="description">状態を確認</span>
                 </button>
             </div>
             
@@ -350,23 +350,43 @@ if (isset($_GET['logout'])) {
             const configs = {
                 'nginx-start': {
                     icon: '▶️',
-                    label: 'Start',
+                    label: 'Nginx Start',
                     desc: 'Nginxを起動'
                 },
                 'nginx-stop': {
                     icon: '⏹️',
-                    label: 'Stop',
+                    label: 'Nginx Stop',
                     desc: 'Nginxを停止'
                 },
                 'nginx-reload': {
                     icon: '🔄',
-                    label: 'Reload',
+                    label: 'Nginx Reload',
                     desc: '設定を再読み込み'
                 },
                 'nginx-status': {
                     icon: '📊',
-                    label: 'Status',
+                    label: 'Nginx Status',
                     desc: 'Nginxの状態を確認'
+                },
+                'nextjs-start': {
+                    icon: '▶️',
+                    label: 'Next.js Start',
+                    desc: 'Next.jsを起動'
+                },
+                'nextjs-stop': {
+                    icon: '⏹️',
+                    label: 'Next.js Stop',
+                    desc: 'Next.jsを停止'
+                },
+                'nextjs-restart': {
+                    icon: '🔄',
+                    label: 'Next.js Restart',
+                    desc: 'Next.jsを再起動'
+                },
+                'nextjs-status': {
+                    icon: '📊',
+                    label: 'Next.js Status',
+                    desc: '状態を確認'
                 },
                 'npm-build': {
                     icon: '🔨',
@@ -420,14 +440,24 @@ if (isset($_GET['logout'])) {
                     
                     if (isRunning) {
                         statusSpan.innerHTML = '<span style="color: #10b981; font-weight: bold;">● Next.js起動中</span>';
-                        // Next.js起動中はbuildとstartを無効化
-                        document.getElementById('btn-npm-build').disabled = true;
-                        document.getElementById('btn-npm-start').disabled = true;
+                        // Next.js起動中は起動ボタンを無効化、停止・再起動ボタンを有効化
+                        const startBtn = document.getElementById('btn-nextjs-start');
+                        const stopBtn = document.getElementById('btn-nextjs-stop');
+                        const restartBtn = document.getElementById('btn-nextjs-restart');
+                        
+                        if (startBtn) startBtn.disabled = true;
+                        if (stopBtn) stopBtn.disabled = false;
+                        if (restartBtn) restartBtn.disabled = false;
                     } else {
                         statusSpan.innerHTML = '<span style="color: #6b7280;">○ Next.js停止中</span>';
-                        // Next.js停止中はbuildとstartを有効化
-                        document.getElementById('btn-npm-build').disabled = false;
-                        document.getElementById('btn-npm-start').disabled = false;
+                        // Next.js停止中は起動ボタンを有効化、停止・再起動ボタンを無効化
+                        const startBtn = document.getElementById('btn-nextjs-start');
+                        const stopBtn = document.getElementById('btn-nextjs-stop');
+                        const restartBtn = document.getElementById('btn-nextjs-restart');
+                        
+                        if (startBtn) startBtn.disabled = false;
+                        if (stopBtn) stopBtn.disabled = true;
+                        if (restartBtn) restartBtn.disabled = true;
                     }
                 }
             } catch (error) {
