@@ -1,0 +1,20 @@
+[Unit]
+Description=Next.js Application
+After=network.target
+
+[Service]
+Type=simple
+User=sysmanager
+WorkingDirectory=/home/sysmanager/next-website
+ExecStart=/usr/bin/npm run start -- -p 3000
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=nextjs-app
+
+# Environment variables
+Environment="NODE_ENV=production"
+
+[Install]
+WantedBy=multi-user.target

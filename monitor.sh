@@ -73,6 +73,7 @@ log "🔍 監視を開始します"
 # サービス監視
 check_service "nextjs-manager-backend.service"
 check_service "nextjs-manager-frontend.service"
+check_service "nextjs-app.service"
 
 # リソース監視
 check_disk_space

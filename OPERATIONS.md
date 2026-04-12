@@ -49,11 +49,14 @@ sudo systemctl status nextjs-manager.target
 # バックエンド
 sudo systemctl status nextjs-manager-backend
 
-# フロントエンド
+# フロントエンド（管理画面）
 sudo systemctl status nextjs-manager-frontend
 
-# 両方まとめて
-sudo systemctl status nextjs-manager-backend nextjs-manager-frontend
+# Next.jsアプリ
+sudo systemctl status nextjs-app
+
+# まとめて確認
+sudo systemctl status nextjs-manager-backend nextjs-manager-frontend nextjs-app
 ```
 
 ## 🔄 サービス操作
@@ -61,31 +64,34 @@ sudo systemctl status nextjs-manager-backend nextjs-manager-frontend
 ### 起動
 ```bash
 # 全体
-sudo systemctl start nextjs-manager.target
+sudo systemctl start nextjs-manager.target nextjs-app
 
 # 個別
 sudo systemctl start nextjs-manager-backend
 sudo systemctl start nextjs-manager-frontend
+sudo systemctl start nextjs-app
 ```
 
 ### 停止
 ```bash
 # 全体
-sudo systemctl stop nextjs-manager.target
+sudo systemctl stop nextjs-manager.target nextjs-app
 
 # 個別
 sudo systemctl stop nextjs-manager-backend
 sudo systemctl stop nextjs-manager-frontend
+sudo systemctl stop nextjs-app
 ```
 
 ### 再起動
 ```bash
 # 全体
-sudo systemctl restart nextjs-manager.target
+sudo systemctl restart nextjs-manager.target nextjs-app
 
 # 個別
 sudo systemctl restart nextjs-manager-backend
 sudo systemctl restart nextjs-manager-frontend
+sudo systemctl restart nextjs-app
 ```
 
 ## 📝 ログ確認
@@ -234,8 +240,9 @@ sudo systemctl enable nextjs-manager-monitor.timer
 
 ## 🌐 アクセスURL
 
-- **フロントエンド**: http://サーバーIP:8080
+- **管理画面**: http://サーバーIP:8080
 - **バックエンドAPI**: http://サーバーIP:8070
+- **Next.jsアプリ**: http://サーバーIP:3000
 - **Next.jsプロジェクト**: /home/sysmanager/next-website
 
 ## 🔑 デフォルトログイン情報

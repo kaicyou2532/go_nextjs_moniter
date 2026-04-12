@@ -8,8 +8,10 @@ echo "🚀 デプロイ開始..."
 
 # プロジェクトディレクトリ
 PROJECT_DIR="/home/sysmanager/go_nextjs_moniter"
+NEXTJS_DIR="/home/sysmanager/next-website"
 BACKEND_SERVICE="nextjs-manager-backend"
 FRONTEND_SERVICE="nextjs-manager-frontend"
+NEXTJS_SERVICE="nextjs-app"
 TARGET_SERVICE="nextjs-manager.target"
 MONITOR_SERVICE="nextjs-manager-monitor.service"
 MONITOR_TIMER="nextjs-manager-monitor.timer"
@@ -19,8 +21,21 @@ echo "📥 最新版を取得中..."
 cd $PROJECT_DIR
 git pull
 
+# Next.jsプロジェクトも更新
+echo "📥 Next.jsプロジェクトを更新中..."
+cd $NEXTJS_DIR
+git pull || echo "⚠️  Next.jsプロジェクトのgit pullをスキップ"
+
+# Next.jsの依存関係を更新
+echo "📦 Next.js依存関係を更新中..."
+npm install
+
+# Next.jsをビルド
+echo "🔨 Next.jsをビルド中..."
+npm run build
+
 # Goのモジュールを更新
-echo "📦 依存関係を更新中..."
+echo "📦 Go依存関係を更新中..."
 cd $PROJECT_DIR/backend
 go mod tidy
 
@@ -42,6 +57,11 @@ if [ ! -f /etc/systemd/system/$FRONTEND_SERVICE.service ]; then
     sudo cp $PROJECT_DIR/nextjs-manager-frontend.service /etc/systemd/system/
 fi
 
+if [ ! -f /etc/systemd/system/$NEXTJS_SERVICE.service ]; then
+    echo "📋 Next.jsサービスを登録中..."
+    sudo cp $PROJECT_DIR/nextjs-app.service /etc/systemd/system/
+fi
+
 if [ ! -f /etc/systemd/system/$TARGET_SERVICE ]; then
     echo "📋 targetを登録中..."
     sudo cp $PROJECT_DIR/nextjs-manager.target /etc/systemd/system/
@@ -61,12 +81,14 @@ fi
 sudo systemctl daemon-reload
 sudo systemctl enable $BACKEND_SERVICE
 sudo systemctl enable $FRONTEND_SERVICE
+sudo systemctl enable $NEXTJS_SERVICE
 sudo systemctl enable $TARGET_SERVICE
 sudo systemctl enable $MONITOR_TIMER
 
 # サービスを再起動
 echo "🔄 サービスを再起動中..."
 sudo systemctl restart $TARGET_SERVICE
+sudo systemctl restart $NEXTJS_SERVICE
 
 # 監視タイマーを開始
 echo "🔍 監視タイマーを開始中..."
@@ -86,6 +108,10 @@ echo "✅ フロントエンド:"
 sudo systemctl status $FRONTEND_SERVICE --no-pager | head -8
 
 echo ""
+echo "✅ Next.jsアプリ:"
+sudo systemctl status $NEXTJS_SERVICE --no-pager | head -8
+
+echo ""
 echo "✅ 監視タイマー:"
 sudo systemctl status $MONITOR_TIMER --no-pager | head -8
 
@@ -93,14 +119,15 @@ echo ""
 echo "✨ デプロイ完了！"
 echo ""
 echo "📍 アクセス URL:"
-echo "   フロントエンド: http://サーバーIP:8080"
+echo "   管理画面: http://サーバーIP:8080"
 echo "   バックエンドAPI: http://サーバーIP:8070"
+echo "   Next.jsアプリ: http://サーバーIP:3000"
 echo ""
 echo "🎯 統合コマンド（推奨）:"
-echo "   起動: sudo systemctl start $TARGET_SERVICE"
-echo "   停止: sudo systemctl stop $TARGET_SERVICE"
-echo "   再起動: sudo systemctl restart $TARGET_SERVICE"
-echo "   状態確認: sudo systemctl status $TARGET_SERVICE"
+echo "   起動: sudo systemctl start $TARGET_SERVICE $NEXTJS_SERVICE"
+echo "   停止: sudo systemctl stop $TARGET_SERVICE $NEXTJS_SERVICE"
+echo "   再起動: sudo systemctl restart $TARGET_SERVICE $NEXTJS_SERVICE"
+echo "   状態確認: sudo systemctl status $TARGET_SERVICE $NEXTJS_SERVICE"
 echo ""
 echo "🔍 監視コマンド:"
 echo "   タイマー状態: sudo systemctl status $MONITOR_TIMER"
@@ -110,4 +137,5 @@ echo ""
 echo "📊 ログ確認:"
 echo "   バックエンド: sudo journalctl -u $BACKEND_SERVICE -f"
 echo "   フロントエンド: sudo journalctl -u $FRONTEND_SERVICE -f"
-echo "   両方: sudo journalctl -u $BACKEND_SERVICE -u $FRONTEND_SERVICE -f"
+echo "   Next.js: sudo journalctl -u $NEXTJS_SERVICE -f"
+echo "   全部: sudo journalctl -u $BACKEND_SERVICE -u $FRONTEND_SERVICE -u $NEXTJS_SERVICE -f"
