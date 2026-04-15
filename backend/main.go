@@ -273,9 +273,9 @@ func executeCommandHandler(w http.ResponseWriter, r *http.Request) {
 			// 1. サービスを停止
 			exec.Command("sudo", "systemctl", "stop", "nextjs-app").Run()
 
-			// 2. .nextディレクトリを削除
+			// 2. .nextディレクトリを削除（sudo権限で削除）
 			nextDir := filepath.Join(req.Path, ".next")
-			os.RemoveAll(nextDir)
+			exec.Command("sudo", "rm", "-rf", nextDir).Run()
 
 			// 3. ビルド
 			buildCmd := exec.Command("npm", "run", "build")

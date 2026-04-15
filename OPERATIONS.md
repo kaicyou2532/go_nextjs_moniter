@@ -25,12 +25,13 @@ sysmanager ALL=(ALL) NOPASSWD: /usr/bin/systemctl is-active nextjs-app
 sysmanager ALL=(ALL) NOPASSWD: /usr/bin/journalctl *
 sysmanager ALL=(ALL) NOPASSWD: /usr/bin/tail *
 sysmanager ALL=(ALL) NOPASSWD: /usr/bin/pkill *
+sysmanager ALL=(ALL) NOPASSWD: /bin/rm -rf /home/sysmanager/next-website/.next
 ```
 
 権限設定：
 ```bash
 # セッションディレクトリの権限修正
-chmod 700 ~/go_nextjs_moniter/frontend/sessions
+chmod 770 ~/go_nextjs_moniter/frontend/sessions
 ```
 
 ## 🚀 デプロイ
