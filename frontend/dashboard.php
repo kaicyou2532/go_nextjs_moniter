@@ -278,7 +278,7 @@ if (isset($_GET['logout'])) {
                 </button> -->
                 <button class="btn btn-success" id="btn-nextjs-build-start" onclick="executeCommand('nextjs-build-start')">
                     <span class="icon">🔨</span>
-                    <span>記事を新規更新</span>
+                    <span>新規記事を公開</span>
                     <span class="description">ビルドして起動</span>
                 </button>
                 <button class="btn btn-primary" id="btn-nextjs-start" onclick="executeCommand('nextjs-start')">
