@@ -266,7 +266,7 @@ if (isset($_GET['logout'])) {
             </div>
             
             <div class="button-group">
-                <button class="btn btn-success" id="btn-nginx-start" onclick="executeCommand('nginx-start')">
+                <!-- <button class="btn btn-success" id="btn-nginx-start" onclick="executeCommand('nginx-start')">
                     <span class="icon">▶️</span>
                     <span>Nginx Start</span>
                     <span class="description">Nginxを起動</span>
@@ -275,20 +275,20 @@ if (isset($_GET['logout'])) {
                     <span class="icon">⏹️</span>
                     <span>Nginx Stop</span>
                     <span class="description">Nginxを停止</span>
-                </button>
-                <button class="btn btn-warning" id="btn-nextjs-build-start" onclick="executeCommand('nextjs-build-start')">
+                </button> -->
+                <button class="btn btn-success" id="btn-nextjs-build-start" onclick="executeCommand('nextjs-build-start')">
                     <span class="icon">🔨</span>
-                    <span>Next.js Build & Start</span>
+                    <span>記事を新規更新</span>
                     <span class="description">ビルドして起動</span>
                 </button>
                 <button class="btn btn-primary" id="btn-nextjs-start" onclick="executeCommand('nextjs-start')">
                     <span class="icon">▶️</span>
-                    <span>Next.js Start</span>
+                    <span>ウェブサイトを起動</span>
                     <span class="description">Next.jsを起動</span>
                 </button>
                 <button class="btn btn-danger" id="btn-nextjs-stop" onclick="executeCommand('nextjs-stop')">
                     <span class="icon">⏹️</span>
-                    <span>Next.js Stop</span>
+                    <span>ウェブサイトを停止</span>
                     <span class="description">Next.jsを停止</span>
                 </button>
             </div>
