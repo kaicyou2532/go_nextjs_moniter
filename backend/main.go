@@ -19,6 +19,12 @@ import (
 	"github.com/rs/cors"
 )
 
+// /health エンドポイント: サービス稼働中は200を返す
+func healthHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("ok"))
+}
+
 // User represents a user account
 type User struct {
 	Username     string `json:"username"`
@@ -651,6 +657,9 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
+
+	// /health エンドポイント
+	mux.HandleFunc("/health", healthHandler)
 
 	mux.HandleFunc("/api/login", loginHandler)
 	mux.HandleFunc("/api/logout", authenticate(logoutHandler))
