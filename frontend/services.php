@@ -453,7 +453,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
                     <div class="service-name">インスタ自動投稿管理</div>
                     <div class="service-subtitle"></div>
                 </div>
-                <br>
 
                  <div class="service-item" style="opacity: 0.5; cursor: not-allowed;">
                     <div class="service-icon">📚</div>
