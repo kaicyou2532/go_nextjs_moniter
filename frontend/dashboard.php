@@ -1,14 +1,7 @@
 <?php
 require_once 'config.php';
 requireLogin();
-
-// ログアウト処理
-if (isset($_GET['logout'])) {
-    apiRequest('/logout', 'POST');
-    session_destroy();
-    header('Location: login.php');
-    exit;
-}
+handleLogoutRequest();
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -68,6 +61,10 @@ if (isset($_GET['logout'])) {
         
         .logout-btn:hover {
             background: #d1d5db;
+        }
+
+        .logout-form {
+            margin: 0;
         }
         
         .container {
@@ -252,7 +249,11 @@ if (isset($_GET['logout'])) {
             </div>
             <div class="user-info">
                 <span>ようこそ、<?php echo htmlspecialchars($_SESSION['username']); ?>さん</span>
-                <a href="services.php?logout" class="logout-btn">ログアウト</a>
+                <form method="POST" class="logout-form">
+                    <?php echo csrfField(); ?>
+                    <input type="hidden" name="action" value="logout">
+                    <button type="submit" class="logout-btn">ログアウト</button>
+                </form>
             </div>
         </div>
     </div>

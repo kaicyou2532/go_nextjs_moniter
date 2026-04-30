@@ -20,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
         
         if ($response['code'] === 200 && $response['data']['success']) {
+            session_regenerate_id(true);
             $_SESSION['token'] = $response['data']['token'];
             $_SESSION['username'] = $username;
             header('Location: services.php');
@@ -149,15 +150,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="error"><?php echo htmlspecialchars($error); ?></div>
         <?php endif; ?>
         
-        <form method="POST" action="">
+        <form method="POST" action="" autocomplete="on">
             <div class="form-group">
                 <label for="username">ユーザー名</label>
-                <input type="text" id="username" name="username" required>
+                <input type="text" id="username" name="username" required autocomplete="username">
             </div>
             
             <div class="form-group">
                 <label for="password">パスワード</label>
-                <input type="password" id="password" name="password" required>
+                <input type="password" id="password" name="password" required autocomplete="current-password">
             </div>
             
             <button type="submit" class="btn">ログイン</button>

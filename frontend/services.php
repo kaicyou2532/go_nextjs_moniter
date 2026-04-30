@@ -1,13 +1,33 @@
 <?php
 require_once 'config.php';
 requireLogin();
+handleLogoutRequest();
 
-// ログアウト処理
-if (isset($_GET['logout'])) {
-    apiRequest('/logout', 'POST');
-    session_destroy();
-    header('Location: login.php');
-    exit;
+$accountError = '';
+$accountSuccess = '';
+$initialTab = 'applications';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'create_admin') {
+    verifyCsrfToken();
+
+    $username = trim($_POST['new_username'] ?? '');
+    $password = $_POST['new_password'] ?? '';
+    $confirmPassword = $_POST['confirm_password'] ?? '';
+
+    $response = apiRequest('/admin/users', 'POST', [
+        'username' => $username,
+        'password' => $password,
+        'confirm_password' => $confirmPassword,
+    ]);
+
+    if ($response['code'] === 201 && !empty($response['data']['success'])) {
+        $createdUsername = $response['data']['user']['username'] ?? $username;
+        $accountSuccess = '管理者アカウントを作成しました: ' . $createdUsername;
+        $initialTab = 'account';
+    } else {
+        $accountError = $response['data']['error'] ?? '管理者アカウントの作成に失敗しました';
+        $initialTab = 'account';
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -110,6 +130,10 @@ if (isset($_GET['logout'])) {
         
         .logout-btn:hover {
             background: #d1d5db;
+        }
+
+        .logout-form {
+            margin: 0;
         }
         
         .tabs {
@@ -267,6 +291,107 @@ if (isset($_GET['logout'])) {
             flex: 1;
             color: #6b7280;
         }
+
+        .account-panel {
+            margin-top: 24px;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .section-title {
+            margin-bottom: 16px;
+            color: #333;
+            font-size: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #374151;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #5fb5a8;
+            box-shadow: 0 0 0 3px rgba(95, 181, 168, 0.15);
+        }
+
+        .primary-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            background: #5fb5a8;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .primary-btn:hover {
+            background: #4a9d8e;
+        }
+
+        .message {
+            margin-bottom: 16px;
+            padding: 12px 14px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .message.success {
+            background: #ecfdf5;
+            color: #166534;
+            border: 1px solid #a7f3d0;
+        }
+
+        .message.error {
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        .form-note {
+            margin-top: 12px;
+            color: #6b7280;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .header,
+            .content {
+                padding: 20px;
+            }
+
+            .header-content,
+            .user-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 <body>
@@ -282,18 +407,22 @@ if (isset($_GET['logout'])) {
             <div class="user-section">
                 <div class="user-icon">👤</div>
                 <span class="username"><?php echo htmlspecialchars($_SESSION['username']); ?></span>
-                <a href="?logout" class="logout-btn">ログアウト / Logout</a>
+                <form method="POST" class="logout-form">
+                    <?php echo csrfField(); ?>
+                    <input type="hidden" name="action" value="logout">
+                    <button type="submit" class="logout-btn">ログアウト / Logout</button>
+                </form>
             </div>
         </div>
     </div>
     
     <div class="tabs">
-        <button class="tab active" onclick="switchTab('applications')">Applications</button>
-        <button class="tab" onclick="switchTab('account')">Account Management</button>
+        <button class="tab <?php echo $initialTab === 'applications' ? 'active' : ''; ?>" onclick="switchTab(this, 'applications')">Applications</button>
+        <button class="tab <?php echo $initialTab === 'account' ? 'active' : ''; ?>" onclick="switchTab(this, 'account')">Account Management</button>
     </div>
     
     <div class="content">
-        <div id="applications" class="tab-content active">
+        <div id="applications" class="tab-content <?php echo $initialTab === 'applications' ? 'active' : ''; ?>">
             <div class="services-grid">
                 <a href="dashboard.php" class="service-item">
                     <div class="service-icon shield"></div>
@@ -311,6 +440,12 @@ if (isset($_GET['logout'])) {
                     <div class="service-icon">🗑️</div>
                     <div class="service-name">ファイルクリーンアップ</div>
                     <div class="service-subtitle">古いファイル・ログの削除</div>
+                </a>
+
+                <a href="gitpull.php" class="service-item">
+                    <div class="service-icon">⇅</div>
+                    <div class="service-name">Git Pull 管理</div>
+                    <div class="service-subtitle">Next.js 更新の取得</div>
                 </a>
                 
                 <div class="service-item" style="opacity: 0.5; cursor: not-allowed;">
@@ -341,7 +476,7 @@ if (isset($_GET['logout'])) {
             </div>
         </div>
         
-        <div id="account" class="tab-content">
+        <div id="account" class="tab-content <?php echo $initialTab === 'account' ? 'active' : ''; ?>">
             <div class="account-section">
                 <h2 style="margin-bottom: 20px; color: #333;">アカウント情報</h2>
                 <div class="account-info">
@@ -362,6 +497,42 @@ if (isset($_GET['logout'])) {
                         <div class="info-value">管理者</div>
                     </div>
                 </div>
+
+                <div class="account-panel">
+                    <h3 class="section-title">管理者アカウントを追加</h3>
+
+                    <?php if ($accountSuccess): ?>
+                        <div class="message success"><?php echo htmlspecialchars($accountSuccess); ?></div>
+                    <?php endif; ?>
+
+                    <?php if ($accountError): ?>
+                        <div class="message error"><?php echo htmlspecialchars($accountError); ?></div>
+                    <?php endif; ?>
+
+                    <form method="POST" class="form-grid" autocomplete="off">
+                        <?php echo csrfField(); ?>
+                        <input type="hidden" name="action" value="create_admin">
+
+                        <div class="form-group">
+                            <label for="new_username">新しい管理者ユーザー名</label>
+                            <input type="text" id="new_username" name="new_username" required minlength="3" maxlength="64">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="new_password">パスワード</label>
+                            <input type="password" id="new_password" name="new_password" required minlength="12">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirm_password">パスワード確認</label>
+                            <input type="password" id="confirm_password" name="confirm_password" required minlength="12">
+                        </div>
+
+                        <button type="submit" class="primary-btn">管理者を作成</button>
+                    </form>
+
+                    <p class="form-note">12文字以上で、大文字・小文字・数字を含むパスワードを設定してください。</p>
+                </div>
             </div>
         </div>
     </div>
@@ -370,14 +541,12 @@ if (isset($_GET['logout'])) {
         const API_URL = '<?php echo API_URL; ?>';
         const token = '<?php echo $_SESSION['token']; ?>';
         
-        function switchTab(tabName) {
-            // タブボタンの切り替え
+        function switchTab(button, tabName) {
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.classList.remove('active');
             });
-            event.target.classList.add('active');
+            button.classList.add('active');
             
-            // コンテンツの切り替え
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.remove('active');
             });

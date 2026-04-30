@@ -94,6 +94,12 @@ sudo systemctl stop nextjs-app
 # 全体
 sudo systemctl restart nextjs-manager.target nextjs-app
 
+### バックエンドのヘルスチェック（/health）
+```bash
+curl -i http://サーバーIP:8070/health
+```
+※サーバーIPは環境に合わせて置き換えてください。
+
 # 個別
 sudo systemctl restart nextjs-manager-backend
 sudo systemctl restart nextjs-manager-frontend

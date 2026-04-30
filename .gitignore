@@ -35,3 +35,7 @@ Thumbs.db
 .env.local
 /backend/.env
 /frontend/.env
+
+# 永続ユーザー情報
+/backend/users.json
+/backend/users.json.tmp

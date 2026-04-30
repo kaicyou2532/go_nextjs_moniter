@@ -30,7 +30,8 @@ if (!file_exists($sessionDir)) {
 // セッション設定
 ini_set('session.save_path', $sessionDir);
 ini_set('session.cookie_httponly', 1);
-ini_set('session.cookie_secure', 0); // HTTPSを使用する場合は1に設定
+ini_set('session.cookie_secure', (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? '1' : '0');
+ini_set('session.cookie_samesite', 'Lax');
 ini_set('session.use_strict_mode', 1);
 
 session_start();
@@ -38,6 +39,18 @@ session_start();
 // CSRF対策トークン生成
 if (!isset($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+function verifyCsrfToken(): void {
+    $token = $_POST['csrf_token'] ?? '';
+    if (!hash_equals($_SESSION['csrf_token'] ?? '', $token)) {
+        http_response_code(403);
+        exit('不正なリクエストです');
+    }
+}
+
+function csrfField(): string {
+    return '<input type="hidden" name="csrf_token" value="' . htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') . '">';
 }
 
 function apiRequest($endpoint, $method = 'GET', $data = null) {
@@ -74,6 +87,26 @@ function requireLogin() {
     if (!isset($_SESSION['token']) || !isset($_SESSION['username'])) {
         header('Location: login.php');
         exit;
+    }
+}
+
+function logoutUser(): void {
+    apiRequest('/logout', 'POST');
+    $_SESSION = [];
+
+    if (session_id() !== '' || isset($_COOKIE[session_name()])) {
+        setcookie(session_name(), '', time() - 3600, '/');
+    }
+
+    session_destroy();
+    header('Location: login.php');
+    exit;
+}
+
+function handleLogoutRequest(): void {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'logout') {
+        verifyCsrfToken();
+        logoutUser();
     }
 }
 ?>
