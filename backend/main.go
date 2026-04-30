@@ -118,8 +118,24 @@ var (
 )
 
 func healthHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodOptions {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte("ok"))
+}
+
+func okHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodOptions {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+	respondJSON(w, http.StatusOK, map[string]interface{}{
+		"success": true,
+		"message": "OK",
+		"status":  "ok",
+	})
 }
 
 func defaultUsersFilePath() string {
@@ -1141,6 +1157,8 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", healthHandler)
+	mux.HandleFunc("/api/health", healthHandler)
+	mux.HandleFunc("/api/ok", okHandler)
 	mux.HandleFunc("/api/login", loginHandler)
 	mux.HandleFunc("/api/logout", authenticate(logoutHandler))
 	mux.HandleFunc("/api/validate", authenticate(validateHandler))

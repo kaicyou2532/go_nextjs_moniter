@@ -447,6 +447,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
                     <div class="service-name">Git Pull 管理</div>
                     <div class="service-subtitle">Next.js 更新の取得</div>
                 </a>
+
+                <a href="<?php echo htmlspecialchars(API_URL . '/ok'); ?>" class="service-item" target="_blank" rel="noopener noreferrer">
+                    <div class="service-icon">OK</div>
+                    <div class="service-name">API疎通確認</div>
+                    <div class="service-subtitle">200 OK を表示</div>
+                </a>
                 
                 <div class="service-item" style="opacity: 0.5; cursor: not-allowed;">
                     <div class="service-icon"></div>
